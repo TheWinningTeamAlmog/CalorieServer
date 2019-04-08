@@ -1,11 +1,35 @@
+http://scraper/user_full_info?user=[username]
 {
         "name": "\\",
         "followers": "\\number\\",
         "photos": [ { 
-                "uri" : "\\uri\\",
+                "image" : "\\base64\\",
                 "comments" : [""],
-                "description": "",
                 "tags": [""],
                 "likes": "\\number\\"
-        } ]
+        } ],
+        "likes_avg": "\\number\\"
+}
+
+http://scraper/user_meta_data?user=[username]
+{
+        "name": "\\",
+        "followers": "\\number\\",
+        "avg_likes": "\\number\\"    
+}
+
+http://scraper/feat
+{
+        "db":[
+            {
+                "person": 
+                { 
+                    "name":"",
+                    [{
+                     "tags":[],
+                     "likes": "\\number\\"
+                     "features": []
+                    }]
+            }
+        ]
 }

@@ -25,9 +25,9 @@ http://scraper/feat
                 "person": 
                 { 
                     "name":"",
-                    [{
+                    "pictures" : [{
                      "tags":[],
-                     "likes": "\\number\\"
+                     "likes": "\\number\\",
                      "features": []
                     }]
             }

@@ -7,18 +7,6 @@ import requests
 from threading import Thread
 
 app = Flask(__name__)
-db_users = ["svetabily",
-"mayshoshan_",
-"saraunderwood",
-"sahara_ray",
-"idanfurman",
-"shai.ron",
-"omer_hazan",
-"livnat_ur",
-"ruslanarodina",
-"hen.mizrahi",
-"nathangoshen",
-"odedpaz"]
 
 def get_followers(username):
     # download html
@@ -46,11 +34,9 @@ def get_followers(username):
         multiplier = 1000000
 
 
-    return int(float(content[followers_pos_start:followers_pos_end])*multiplier)
-
+    return int(float(content[followers_pos_start:followers_pos_end].replace(',', ''))*multiplier)
 def get_avg_likes(username):
-    return 112
-    
+    return 112   
 def get_full_info_local(username, max):
     output_path = "/tmp/inst_scraper/"
 
@@ -107,36 +93,80 @@ def get_full_info():
     username = request.args.get('user')
     max  = int(request.args.get('max', 50))
 
+
     return get_full_info_local(username, max)
-
-
 def research_local():
-    output_json = {}
-    output_json["db"] = []
-
     if os.path.isfile("res"):
         with open("res", "r") as res:
             return res.read()
 
-    for u in db_users:
-        print(u)
-        get_full_info_local(u, 50)
-        print("done")
-    
-    ret = json.dumps(output_json)
-    with open("res", "w") as f:
-        f.write(ret)
-    
-    return ret
+    return ""
 
 @app.route("/db")
 def research():
     return research_local()
+    return "db"
 
 
 @app.route("/")
 def hello():
     return "Hello World"
+
+def get_lables(url):
+    resp = requests.get(url ="https://eu-gb.functions.cloud.ibm.com/api/v1/web/shmueljacobs%40gmail.com_dev/Test/weather.json",
+                    params={"url" : url})
+    resp_json = json.loads(resp.text)
+    
+    if "features" not in resp_json:
+        print("Featureless")
+        return []
+
+    return json.loads(resp.text)["features"]
+     
+def get_features_local():
+    db = json.loads(research_local())["db"]
+    output_json = {}
+    output_json["persons"] = []
+
+    if os.path.isfile("feat"):
+        with open("feat", "r") as feat:
+            return feat.read()
+    for person in db:
+        inner_obj = {}
+        inner_obj["name"] = person["name"]
+        inner_obj["likes_avg"] = person["likes_avg"]
+        inner_obj["followers"] = person["followers"]
+        print(person["name"])
+
+        photos = person["photos"]
+        inner_obj["photos"] = []
+        
+        counter = 0
+        for photo in photos:
+            inner_photo = {}
+            inner_photo["tags"] = photo["tags"]
+            inner_photo["likes"] = photo["likes"]
+            inner_photo["lables"] = get_lables(photo["image"])
+            inner_photo["commnets"] = photo["comment"]
+            inner_obj["photos"].append(inner_photo)
+            counter+=1
+            print(str(counter) + "/" + str(len(photos)))
+            
+        print("done")
+        
+        output_json["persons"].append(inner_obj)
+    
+    feat_dump = json.dumps(output_json)
+
+    with open("feat", "w") as feat:
+            feat.write(feat_dump)
+
+    return feat_dump
+    
+
+@app.route("/feat")
+def get_features():
+    return get_features_local()
 
 @app.route("/user_meta_data")
 def get_user_metadata():
@@ -151,7 +181,6 @@ def get_user_metadata():
     data['avg_likes'] = avg_likes
 
     return json.dumps(data)
-
 
 app.run()
 

@@ -20,16 +20,16 @@ http://scraper/user_meta_data?user=[username]
 
 http://scraper/feat
 {
-        "db":[
-            {
-                "person": 
+        "persons":[
                 { 
-                    "name":"",
-                    "pictures" : [{
+                     "name":"",
+                     "like_avg":"\\float\\",
+                     "followers":"\\number\\",
+                     "photos" : [{
                      "tags":[],
                      "likes": "\\number\\",
-                     "features": []
+                     "labels": [],
+                     "comments": []
                     }]
-            }
-        ]
+                }]
 }

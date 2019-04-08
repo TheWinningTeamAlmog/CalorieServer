@@ -6,9 +6,16 @@ http://scraper/user_full_info?user=[username]
                 "image" : "\\base64\\",
                 "comments" : [""],
                 "tags": [""],
+
+
                 "likes": "\\number\\"
         } ],
         "likes_avg": "\\number\\"
+}
+
+http://scrapper/comments?user=[username]
+{
+        "comments": []
 }
 
 http://scraper/user_meta_data?user=[username]

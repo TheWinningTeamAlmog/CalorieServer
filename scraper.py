@@ -5,6 +5,7 @@ from flask import Flask, request
 import os
 import requests
 from threading import Thread
+import random
 
 app = Flask(__name__)
 
@@ -36,7 +37,7 @@ def get_followers(username):
 
     return int(float(content[followers_pos_start:followers_pos_end].replace(',', ''))*multiplier)
 def get_avg_likes(username):
-    return 112   
+    return random.uniform(20.0, 40.0) 
 def get_full_info_local(username, max):
     output_path = "/tmp/inst_scraper/"
 
@@ -105,8 +106,6 @@ def research_local():
 @app.route("/db")
 def research():
     return research_local()
-    return "db"
-
 
 @app.route("/")
 def hello():
@@ -146,8 +145,8 @@ def get_features_local():
             inner_photo = {}
             inner_photo["tags"] = photo["tags"]
             inner_photo["likes"] = photo["likes"]
-            inner_photo["lables"] = get_lables(photo["image"])
-            inner_photo["commnets"] = photo["comment"]
+            inner_photo["labels"] = get_lables(photo["image"])
+            inner_photo["comments"] = photo["comment"]
             inner_obj["photos"].append(inner_photo)
             counter+=1
             print(str(counter) + "/" + str(len(photos)))
@@ -156,10 +155,10 @@ def get_features_local():
         
         output_json["persons"].append(inner_obj)
     
-    feat_dump = json.dumps(output_json)
+    feat_dump = json.dumps(output_json, ensure_ascii=False).encode('utf-8')
 
     with open("feat", "w") as feat:
-            feat.write(feat_dump)
+            feat.write(str(feat_dump))
 
     return feat_dump
     
@@ -172,15 +171,76 @@ def get_features():
 def get_user_metadata():
     username = request.args.get('user')
 
-    followers = get_followers(username)
     avg_likes = get_avg_likes(username)
 
     data = {}
-    data['name']      = username
-    data['followers'] = followers
     data['avg_likes'] = avg_likes
 
     return json.dumps(data)
+
+@app.route("/comments")
+def get_comments():
+    feats = []
+    count = int(request.args.get('count', 0))
+
+    for i in range(1, count):
+        feats.append(request.args.get("feat"+str(i), []))
+    
+    parsed_json={}
+    with open("out.json", "r") as feat:
+        parsed_json = json.loads(feat.read())
+    
+
+    comments = []
+    for f in feats:
+        if f not in parsed_json:
+            continue
+
+        c = parsed_json[f]["comments"]
+
+        if len(c) <= 3:
+            print("here")
+            comments.extend(c)
+        
+        for i in range(1, 3):
+            r = random.choice(c)
+            while r in comments:
+                r = random.choice(c)
+
+            comments.append(r)
+                
+
+    output_json = {}
+    output_json["comments"] = comments
+
+    return json.dumps(output_json, ensure_ascii=False).encode("utf-8")
+
+    
+with open("a.json") as f:
+    label_tag = json.load(f)
+
+
+@app.route("/tags")
+def get_tags():
+    feats = []
+    count = int(request.args.get('count', 0))
+
+    for i in range(1, count):
+        feats.append(request.args.get("feat"+str(i), []))
+
+    output = {}
+    output["tags"] = []
+
+    for f in feats:
+        s = label_tag.get(f.lower())
+        if s:
+            output["tags"].append(s)
+        
+    return json.dumps(output)
+
+
+        
+
 
 app.run()
 
